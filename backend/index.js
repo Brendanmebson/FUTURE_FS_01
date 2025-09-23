@@ -6,23 +6,41 @@ const contactRouter = require('./routes/contact');
 
 const app = express();
 app.use(express.json());
-app.use(cors());
 
-// connect to MongoDB
+// ✅ Allowed origins (localhost + deployed frontend)
+const allowedOrigins = [
+  "http://localhost:5173", // Vite dev server
+  "https://future-interns-task1.vercel.app" // deployed frontend on Vercel
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like curl or mobile apps)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
+// ✅ MongoDB connection
 const uri = process.env.MONGODB_URI;
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
-  console.log('Connected to MongoDB');
+  console.log('✅ Connected to MongoDB');
 }).catch((err) => {
-  console.error('MongoDB connection error:', err);
+  console.error('❌ MongoDB connection error:', err);
 });
 
-// routes
+// ✅ Routes
 app.use('/api/contact', contactRouter);
 
-app.get('/', (req, res) => res.send('Portfolio backend up'));
+app.get('/', (req, res) => res.send('Portfolio backend up 🚀'));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`⚡ Server running on port ${PORT}`));
