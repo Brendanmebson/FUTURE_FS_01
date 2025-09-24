@@ -10,7 +10,9 @@ app.use(express.json());
 // ✅ Allowed origins
 const allowedOrigins = [
   "http://localhost:5173",                 // local dev
-  "https://future-interns-task1.vercel.app" // deployed frontend
+  "https://future-interns-task1.vercel.app" ,// deployed frontend
+  "https://futureinterns-task1.vercel.app"    // without dash
+
 ];
 
 // ✅ Centralized CORS config (with preview deploy + Postman support)
