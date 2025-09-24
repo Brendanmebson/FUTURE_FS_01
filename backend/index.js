@@ -5,58 +5,55 @@ const cors = require('cors');
 const contactRouter = require('./routes/contact');
 
 const app = express();
+
+// ✅ Middleware
 app.use(express.json());
 
-// ✅ Allowed origins
+// ✅ Allowed origins (update with your frontend URLs)
 const allowedOrigins = [
-  "http://localhost:5173",                  // local dev
-  "https://future-interns-task1.vercel.app", // deployed frontend
-  "https://futureinterns-task1.vercel.app"   // without dash
+  "http://localhost:5173",                 // Vite dev server
+  "https://future-interns-task1.vercel.app" // deployed frontend on Vercel
 ];
 
-// ✅ Centralized CORS config (now handles preflight properly)
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // server-to-server or Postman
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error("❌ Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 
-    if (
-      allowedOrigins.includes(origin) ||
-      /\.vercel\.app$/.test(origin) // ✅ allow all vercel preview subdomains
-    ) {
-      return callback(null, true);
-    }
-
-    console.error("❌ Blocked by CORS:", origin);
-    return callback(new Error("Not allowed by CORS"));
-  },
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ explicitly handle preflight requests
-
-// ✅ MongoDB connection
-const uri = process.env.MONGODB_URI;
-mongoose.connect(uri)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
-
-// ✅ Routes
+// ✅ API routes
 app.use('/api/contact', contactRouter);
 
-// ✅ Root route (for Render health check)
-app.get('/', (req, res) => res.send('Portfolio backend up 🚀'));
-
-// ✅ Global Error Handler (safe response for production)
-app.use((err, req, res, next) => {
-  console.error("🔥 Error:", err.stack || err.message);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.expose ? err.message : "Something went wrong. Please try again.",
-  });
+// ✅ Root route for testing
+app.get('/', (req, res) => {
+  res.send('Backend is running 🚀');
 });
 
+// ✅ Catch-all (for 404s)
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// ✅ Connect DB and start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`⚡ Server running on port ${PORT}`));
+const uri = process.env.MONGODB_URI; // from .env
+
+mongoose
+  .connect(uri)
+  .then(() => {
+    console.log("✅ MongoDB connected");   // 👈 your success log
+    app.listen(PORT, () =>
+      console.log(`⚡ Server running on port ${PORT}`)
+    );
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
