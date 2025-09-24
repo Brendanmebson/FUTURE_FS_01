@@ -22,7 +22,7 @@ export default function Contact() {
         import.meta.env.VITE_API_BASE ||
         (window.location.hostname === "localhost"
           ? "http://localhost:5000"
-          : "https://futureinterns-task1-backend.onrender.com");
+          : "https://futureinterns-task1.onrender.com");
 
       await axios.post(`${base}/api/contact`, form);
 

@@ -5,16 +5,16 @@ const cors = require('cors');
 const contactRouter = require('./routes/contact');
 
 const app = express();
-
-// ✅ Middleware
 app.use(express.json());
 
-// ✅ Allowed origins (update with your frontend URLs)
+// ✅ Allowed origins
 const allowedOrigins = [
-  "http://localhost:5173",                 // Vite dev server
-  "https://future-interns-task1.vercel.app" // deployed frontend on Vercel
+  "http://localhost:5173",                 // local dev
+  "https://future-interns-task1.vercel.app", // deployed frontend
+  "https://futureinterns-task1.vercel.app"    // without dash
 ];
 
+// ✅ Single CORS middleware (handles preflight OPTIONS too)
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -25,33 +25,31 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    methods: ["GET", "POST", "OPTIONS"], // 👈 allow preflight & POST
+    allowedHeaders: ["Content-Type"],    // 👈 allow JSON requests
+    credentials: true,
   })
 );
 
-// ✅ API routes
+// ✅ Routes
 app.use('/api/contact', contactRouter);
 
-// ✅ Root route for testing
+// ✅ Root route
 app.get('/', (req, res) => {
   res.send('Backend is running 🚀');
 });
 
-// ✅ Catch-all (for 404s)
+// ✅ Catch-all
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// ✅ Connect DB and start server
+// ✅ Connect DB & Start server
 const PORT = process.env.PORT || 5000;
-const uri = process.env.MONGODB_URI; // from .env
-
-mongoose
-  .connect(uri)
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log("✅ MongoDB connected");   // 👈 your success log
-    app.listen(PORT, () =>
-      console.log(`⚡ Server running on port ${PORT}`)
-    );
+    console.log("✅ MongoDB connected");
+    app.listen(PORT, () => console.log(`⚡ Server running on port ${PORT}`));
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
