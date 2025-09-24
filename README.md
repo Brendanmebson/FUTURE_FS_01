@@ -43,60 +43,58 @@ A full-stack professional portfolio website designed to showcase your skills, pr
 - Deployment: Vercel (frontend), Render/Railway/Heroku (backend)
 
 ## Getting Started
-`` 1. Clone the repository
+
+1. Clone the repository
+```
 git clone https://github.com/your-username/portfolio.git
-cd portfolio ``
+cd portfolio
+```
 
 2. Backend Setup
+```
 cd backend
 npm install
-
+```
 
 Create .env file:
-
+```
 MONGO_URI=your_mongo_uri
 EMAIL=your_email@gmail.com
 PASS=your_email_app_password
-
-
+```
 Start backend server:
-
+```
 node server.js
+```
 
 3. Frontend Setup
+```
 cd ../frontend
 npm install
 npm run dev
-
+```
 
 Visit http://localhost:5173
  to see your portfolio locally.
 
 ## Usage
 
-Explore homepage, projects, contact, and blog/testimonials sections
-
-Use the contact form to send emails
-
-Browse projects and optional blog/testimonials section
+- Explore homepage, projects, contact, and blog/testimonials sections
+- Use the contact form to send emails
+- Browse projects and optional blog/testimonials section
 
 ## Deployment
 
-Frontend: Deploy on Vercel via GitHub repository
-
-Backend: Deploy on Render/Railway/Heroku, setting environment variables
+- Frontend: Deploy on Vercel via GitHub repository
+- Backend: Deploy on Render/Railway/Heroku, setting environment variables
 
 ## Contributing
 
-Contributions are welcome! You can:
-
-Improve UI/UX
-
-Add projects/blog posts
-
-Optimize SEO/performance
-
-Please create a pull request with a detailed description of changes.
+- Contributions are welcome! You can:
+- Improve UI/UX
+- Add projects/blog posts
+- Optimize SEO/performance
+- Please create a pull request with a detailed description of changes.
 
 ## License
 
