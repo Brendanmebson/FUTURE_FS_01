@@ -9,14 +9,13 @@ app.use(express.json());
 
 // ✅ Allowed origins
 const allowedOrigins = [
-  "http://localhost:5173",                 // local dev
-  "https://future-interns-task1.vercel.app" ,// deployed frontend
-  "https://futureinterns-task1.vercel.app"    // without dash
-
+  "http://localhost:5173",                  // local dev
+  "https://future-interns-task1.vercel.app", // deployed frontend
+  "https://futureinterns-task1.vercel.app"   // without dash
 ];
 
-// ✅ Centralized CORS config (with preview deploy + Postman support)
-app.use(cors({
+// ✅ Centralized CORS config (now handles preflight properly)
+const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true); // server-to-server or Postman
 
@@ -30,8 +29,13 @@ app.use(cors({
     console.error("❌ Blocked by CORS:", origin);
     return callback(new Error("Not allowed by CORS"));
   },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
   credentials: true,
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // ✅ explicitly handle preflight requests
 
 // ✅ MongoDB connection
 const uri = process.env.MONGODB_URI;
