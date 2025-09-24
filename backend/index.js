@@ -7,44 +7,50 @@ const contactRouter = require('./routes/contact');
 const app = express();
 app.use(express.json());
 
-// ✅ Allowed origins (localhost + deployed frontend)
+// ✅ Allowed origins
 const allowedOrigins = [
-  "http://localhost:5173", // Vite dev server
-  "https://future-interns-task1.vercel.app" // deployed frontend on Vercel
+  "http://localhost:5173",                 // local dev
+  "https://future-interns-task1.vercel.app" // deployed frontend
 ];
 
+// ✅ Centralized CORS config (with preview deploy + Postman support)
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (curl, Postman, mobile apps)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+    if (!origin) return callback(null, true); // server-to-server or Postman
 
-// ✅ Handle preflight requests
-app.options("*", cors());
+    if (
+      allowedOrigins.includes(origin) ||
+      /\.vercel\.app$/.test(origin) // ✅ allow all vercel preview subdomains
+    ) {
+      return callback(null, true);
+    }
+
+    console.error("❌ Blocked by CORS:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+}));
 
 // ✅ MongoDB connection
 const uri = process.env.MONGODB_URI;
-mongoose.connect(uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log('✅ Connected to MongoDB');
-}).catch((err) => {
-  console.error('❌ MongoDB connection error:', err);
-});
+mongoose.connect(uri)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // ✅ Routes
 app.use('/api/contact', contactRouter);
 
+// ✅ Root route (for Render health check)
 app.get('/', (req, res) => res.send('Portfolio backend up 🚀'));
+
+// ✅ Global Error Handler (safe response for production)
+app.use((err, req, res, next) => {
+  console.error("🔥 Error:", err.stack || err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.expose ? err.message : "Something went wrong. Please try again.",
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`⚡ Server running on port ${PORT}`));

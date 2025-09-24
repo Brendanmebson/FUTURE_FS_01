@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, Alert } from '@mui/material';
 import axios from 'axios';
 import { Helmet } from 'react-helmet-async';
 
-export default function Contact(){
+export default function Contact() {
   const [form, setForm] = useState({ name:'', email:'', subject:'', message:'' });
   const [status, setStatus] = useState(null);
 
@@ -12,9 +12,20 @@ export default function Contact(){
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus({ loading: true });
+
     try {
-      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+      // ✅ Backend URL priority:
+      // 1. .env (VITE_API_BASE)
+      // 2. localhost (dev)
+      // 3. Render deployment (fallback)
+      const base =
+        import.meta.env.VITE_API_BASE ||
+        (window.location.hostname === "localhost"
+          ? "http://localhost:5000"
+          : "https://futureinterns-task1-backend.onrender.com");
+
       await axios.post(`${base}/api/contact`, form);
+
       setStatus({ success: true, msg: 'Message sent — thank you!' });
       setForm({ name:'', email:'', subject:'', message:'' });
     } catch(err) {
@@ -100,7 +111,10 @@ export default function Contact(){
             InputProps={{ style: { color: "white" } }}
           />
 
-          <Button type="submit" variant="contained">Send message</Button>
+          <Button type="submit" variant="contained" disabled={status?.loading}>
+            {status?.loading ? "Sending..." : "Send message"}
+          </Button>
+
           <Typography sx={{ color:'var(--muted)', fontSize:13, textAlign:"center" }}>
             This message will be stored in my database and I’ll get an email notification.
           </Typography>
