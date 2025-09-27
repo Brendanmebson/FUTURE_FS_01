@@ -288,10 +288,11 @@ export default function Home() {
           let’s create something impactful together.
         </Typography>
         <Button 
-          variant="contained" 
-          href="/contact" 
-          sx={{ fontSize: '1rem', px: 4, py: 1.2, fontWeight: 600 }}
-        >
+                size="small" 
+                sx={{ mt: 2, fontWeight: 500 }}
+                component={RouterLink} 
+                to="/contact"
+              >
           Say Hello
         </Button>
       </Box>
